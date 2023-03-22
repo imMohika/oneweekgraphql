@@ -25,6 +25,7 @@ type CartItem {
 
 type Mutation {
   addItem(input: AddToCartInput!): Cart
+  removeItem(input: RemoveFromCartInput!): Cart
 }
 
 input AddToCartInput {
@@ -34,4 +35,9 @@ input AddToCartInput {
   quantity: Int = 1
   price: Int!
   image: String
+}
+
+input RemoveFromCartInput {
+  cartId: Int!
+  name: String!
 }
