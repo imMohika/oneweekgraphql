@@ -22,3 +22,16 @@ type CartItem {
   quantity: Int!
   image: String
 }
+
+type Mutation {
+  addItem(input: AddToCartInput!): Cart
+}
+
+input AddToCartInput {
+  cartId: Int!
+  name: String!
+  description: String
+  quantity: Int = 1
+  price: Int!
+  image: String
+}

@@ -5,6 +5,7 @@ import { join } from "path";
 import { prisma } from "../../prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
+import { findOrCreateCart } from "@/lib/cart";
 
 const priceFormatter = Intl.NumberFormat("us", {
   currency: "USD",
@@ -26,16 +27,7 @@ export async function createContext(): Promise<GraphQLContext> {
 
 const resolvers: Resolvers = {
   Query: {
-    cart: async (_, { id }, { prisma }) => {
-      const cart = await prisma.cart.findUnique({ where: { id } });
-      if (cart) return cart;
-
-      return prisma.cart.create({
-        data: {
-          id,
-        },
-      });
-    },
+    cart: async (_, { id }, { prisma }) => findOrCreateCart(prisma, id),
   },
   Cart: {
     items: async ({ id }, _, { prisma }) => {
@@ -80,6 +72,51 @@ const resolvers: Resolvers = {
         amount,
         formatted: priceFormatter.format(amount),
       };
+    },
+  },
+  CartItem: {
+    unitTotal: (item) => {
+      return {
+        amount: item.price,
+        formatted: priceFormatter.format(item.price),
+      };
+    },
+    lineTotal: (item) => {
+      const price = item.price * item.quantity;
+
+      return {
+        amount: price,
+        formatted: priceFormatter.format(price),
+      };
+    },
+  },
+  Mutation: {
+    addItem: async (_, { input }, { prisma }) => {
+      const cart = await findOrCreateCart(prisma, input.cartId);
+
+      await prisma.cartItem.upsert({
+        where: {
+          name_cartId: {
+            name: input.name,
+            cartId: cart.id,
+          },
+        },
+        create: {
+          cartId: cart.id,
+          name: input.name,
+          description: input.description,
+          image: input.image,
+          price: input.price,
+          quantity: input.quantity || 1,
+        },
+        update: {
+          quantity: {
+            increment: input.quantity || 1,
+          },
+        },
+      });
+
+      return cart;
     },
   },
 };
