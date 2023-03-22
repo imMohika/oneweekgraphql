@@ -119,15 +119,32 @@ const resolvers: Resolvers = {
       return cart;
     },
     removeItem: async (_, { input }, { prisma }) => {
-      const { name, cartId } = input;
-      await prisma.cartItem.delete({
-        where: {
-          name_cartId: {
-            name,
-            cartId,
+      const { name, cartId, quantity } = input;
+
+      if (!quantity) {
+        await prisma.cartItem.delete({
+          where: {
+            name_cartId: {
+              name,
+              cartId,
+            },
           },
-        },
-      });
+        });
+      } else {
+        await prisma.cartItem.update({
+          where: {
+            name_cartId: {
+              name,
+              cartId,
+            },
+          },
+          data: {
+            quantity: {
+              decrement: quantity,
+            },
+          },
+        });
+      }
 
       return findOrCreateCart(prisma, cartId);
     },

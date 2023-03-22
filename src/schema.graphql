@@ -40,4 +40,5 @@ input AddToCartInput {
 input RemoveFromCartInput {
   cartId: Int!
   name: String!
+  quantity: Int
 }

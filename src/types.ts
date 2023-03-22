@@ -78,6 +78,7 @@ export type QueryCartArgs = {
 export type RemoveFromCartInput = {
   cartId: Scalars['Int'];
   name: Scalars['String'];
+  quantity?: InputMaybe<Scalars['Int']>;
 };
 
 
