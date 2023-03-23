@@ -1,14 +1,21 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import { getAllItems } from "@/lib/products";
+import { ProductList } from "@/components/ProductList";
+import { InferGetStaticPropsType, NextPage } from "next";
 
-const inter = Inter({ subsets: ['latin'] })
+export const getStaticProps = async () => ({
+  props: {
+    products: getAllItems(),
+  },
+});
 
-export default function Home() {
+const HomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
+  products,
+}) => {
   return (
-    <div>
-      <h1 className="text-3xl">Hola</h1>
-    </div>
+    <main>
+      <ProductList products={products.slice(0, 6)} />
+    </main>
   );
-}
+};
+
+export default HomePage;

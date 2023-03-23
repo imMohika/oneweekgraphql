@@ -92,6 +92,7 @@ export type Query = {
   __typename?: 'Query';
   cart?: Maybe<Cart>;
   item?: Maybe<Item>;
+  items?: Maybe<Array<Maybe<Item>>>;
 };
 
 
@@ -112,12 +113,19 @@ export type RemoveFromCartInput = {
 
 export type CartFragment = { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, description?: string | null, image?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null };
 
+export type GetAllItemsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllItemsQuery = { __typename?: 'Query', items?: Array<{ __typename?: 'Item', name: string, slug: number, price: number, image?: string | null, description?: string | null } | null> | null };
+
 export type GetCartQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
 
 
 export type GetCartQuery = { __typename?: 'Query', cart?: { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, description?: string | null, image?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null } | null };
+
+export type ItemFragment = { __typename?: 'Item', name: string, slug: number, price: number, image?: string | null, description?: string | null };
 
 
 
@@ -271,6 +279,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   cart?: Resolver<Maybe<ResolversTypes['Cart']>, ParentType, ContextType, RequireFields<QueryCartArgs, 'id'>>;
   item?: Resolver<Maybe<ResolversTypes['Item']>, ParentType, ContextType, RequireFields<QueryItemArgs, 'slug'>>;
+  items?: Resolver<Maybe<Array<Maybe<ResolversTypes['Item']>>>, ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = GraphQLContext> = {
@@ -309,6 +318,49 @@ export const CartFragmentDoc = gql`
   }
 }
     `;
+export const ItemFragmentDoc = gql`
+    fragment Item on Item {
+  name
+  slug
+  price
+  image
+  description
+}
+    `;
+export const GetAllItemsDocument = gql`
+    query GetAllItems {
+  items {
+    ...Item
+  }
+}
+    ${ItemFragmentDoc}`;
+
+/**
+ * __useGetAllItemsQuery__
+ *
+ * To run a query within a React component, call `useGetAllItemsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllItemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllItemsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllItemsQuery(baseOptions?: Apollo.QueryHookOptions<GetAllItemsQuery, GetAllItemsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllItemsQuery, GetAllItemsQueryVariables>(GetAllItemsDocument, options);
+      }
+export function useGetAllItemsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllItemsQuery, GetAllItemsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllItemsQuery, GetAllItemsQueryVariables>(GetAllItemsDocument, options);
+        }
+export type GetAllItemsQueryHookResult = ReturnType<typeof useGetAllItemsQuery>;
+export type GetAllItemsLazyQueryHookResult = ReturnType<typeof useGetAllItemsLazyQuery>;
+export type GetAllItemsQueryResult = Apollo.QueryResult<GetAllItemsQuery, GetAllItemsQueryVariables>;
 export const GetCartDocument = gql`
     query GetCart($id: Int!) {
   cart(id: $id) {

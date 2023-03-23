@@ -1,0 +1,7 @@
+# import Item from "./ItemFragment"
+
+query GetAllItems {
+  items {
+    ...Item
+  }
+}

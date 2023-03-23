@@ -1,6 +1,7 @@
 type Query {
   cart(id: Int!): Cart
   item(slug: Int!): Item
+  items: [Item]
 }
 
 type Cart {

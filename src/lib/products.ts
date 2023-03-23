@@ -25,3 +25,7 @@ export const getItem = (slug: number) => {
 
   return item;
 };
+
+export const getAllItems = () => {
+  return Array.from(products.values());
+};

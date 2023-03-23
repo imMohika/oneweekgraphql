@@ -1,0 +1,7 @@
+fragment Item on Item {
+  name
+  slug
+  price
+  image
+  description
+}

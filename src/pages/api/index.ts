@@ -8,7 +8,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { findCart } from "@/lib/cart.server";
 import { stripe } from "@/lib/stripe";
 import { origin } from "@/lib/client";
-import { getItem, products } from "@/lib/products";
+import { getAllItems, getItem, products } from "@/lib/products";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const priceFormatter = Intl.NumberFormat("us", {
@@ -30,6 +30,9 @@ const resolvers: Resolvers = {
     cart: async (_, { id }) => findCart(id),
     item: async (_, { slug }) => {
       return getItem(slug);
+    },
+    items: async (_) => {
+      return getAllItems();
     },
   },
   Cart: {
