@@ -10,8 +10,7 @@ interface CartPageProps {
 }
 
 const CartPage: NextPage<CartPageProps> = ({ cartId }) => {
-  const client = useClient();
-  const { data } = useGetCartQuery({ variables: { id: cartId }, client });
+  const { data } = useGetCartQuery({ variables: { id: cartId } });
 
   if (!data) return <p>Loading</p>;
 
