@@ -8,8 +8,12 @@ export default function App({ Component, pageProps }: AppProps) {
   const client = useClient();
   return (
     <ApolloProvider client={client}>
-      <Header />
-      <Component {...pageProps} />
+      <div className="flex flex-col w-screen h-screen">
+        <Header />
+        <div className="flex-1">
+          <Component {...pageProps} />
+        </div>
+      </div>
     </ApolloProvider>
   );
 }
