@@ -1,5 +1,6 @@
 type Query {
   cart(id: Int!): Cart
+  item(slug: Int!): Item
 }
 
 type Cart {
@@ -9,18 +10,24 @@ type Cart {
   subTotal: Money!
 }
 
-type Money {
-  formatted: String!
-  amount: Int!
+type Item {
+  name: String!
+  slug: Int!
+  price: Float!
+  image: String
+  description: String
 }
 
 type CartItem {
-  name: String!
-  description: String
+  item: Item!
   unitTotal: Money!
   lineTotal: Money!
   quantity: Int!
-  image: String
+}
+
+type Money {
+  formatted: String!
+  amount: Int!
 }
 
 type CheckoutSession {
@@ -36,16 +43,13 @@ type Mutation {
 
 input AddToCartInput {
   cartId: Int!
-  name: String!
-  description: String
+  slug: Int!
   quantity: Int = 1
-  price: Int!
-  image: String
 }
 
 input RemoveFromCartInput {
   cartId: Int!
-  name: String!
+  slug: Int!
   quantity: Int
 }
 

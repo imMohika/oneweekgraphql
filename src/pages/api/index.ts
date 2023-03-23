@@ -4,10 +4,12 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { prisma } from "../../prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { findOrCreateCart } from "@/lib/cart";
 import { stripe } from "@/lib/stripe";
 import { origin } from "@/lib/client";
+import { getItem, products } from "@/lib/products";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const priceFormatter = Intl.NumberFormat("us", {
   currency: "USD",
@@ -30,6 +32,9 @@ export async function createContext(): Promise<GraphQLContext> {
 const resolvers: Resolvers = {
   Query: {
     cart: async (_, { id }, { prisma }) => findOrCreateCart(prisma, id),
+    item: async (_, { slug }, { prisma }) => {
+      return getItem(slug);
+    },
   },
   Cart: {
     items: async ({ id }, _, { prisma }) => {
@@ -62,13 +67,16 @@ const resolvers: Resolvers = {
           },
         })
         .items();
-      if (!items)
+      if (!items) {
         return {
           amount: 0,
           formatted: "0$",
         };
+      }
 
-      const amount = items?.reduce((total, item) => total + item.price, 0);
+      const amount = items
+        .map((item) => ({ ...item, ...getItem(item.slug) }))
+        .reduce((total, item) => total + item.quantity || 1, 0);
 
       return {
         amount,
@@ -77,14 +85,20 @@ const resolvers: Resolvers = {
     },
   },
   CartItem: {
-    unitTotal: (item) => {
+    item: ({ slug }) => {
+      return getItem(slug);
+    },
+    unitTotal: ({ slug }) => {
+      const item = getItem(slug);
       return {
         amount: item.price,
         formatted: priceFormatter.format(item.price),
       };
     },
-    lineTotal: (item) => {
-      const price = item.price * item.quantity;
+
+    lineTotal: ({ slug, quantity }) => {
+      const item = getItem(slug);
+      const price = item.price * quantity;
 
       return {
         amount: price,
@@ -95,20 +109,18 @@ const resolvers: Resolvers = {
   Mutation: {
     addItem: async (_, { input }, { prisma }) => {
       const cart = await findOrCreateCart(prisma, input.cartId);
+      const item = getItem(input.slug);
 
       await prisma.cartItem.upsert({
         where: {
-          name_cartId: {
-            name: input.name,
+          slug_cartId: {
+            slug: item.slug,
             cartId: cart.id,
           },
         },
         create: {
           cartId: cart.id,
-          name: input.name,
-          description: input.description,
-          image: input.image,
-          price: input.price,
+          slug: item.slug,
           quantity: input.quantity || 1,
         },
         update: {
@@ -120,30 +132,63 @@ const resolvers: Resolvers = {
 
       return cart;
     },
-    removeItem: async (_, { input }, { prisma }) => {
-      const { name, cartId, quantity } = input;
 
-      if (!quantity) {
-        await prisma.cartItem.delete({
-          where: {
-            name_cartId: {
-              name,
-              cartId,
+    removeItem: async (_, { input }, { prisma }) => {
+      const { slug, cartId, quantity } = input;
+      console.log({
+        message: "deleting item from cart",
+        slug,
+        cartId,
+        quantity: quantity ? quantity : "all",
+      });
+      try {
+        if (!quantity) {
+          const result = await prisma.cartItem.delete({
+            where: {
+              slug_cartId: {
+                slug,
+                cartId,
+              },
             },
-          },
-        });
-      } else {
-        await prisma.cartItem.update({
-          where: {
-            name_cartId: {
-              name,
-              cartId,
+          });
+          console.log({ result });
+        } else {
+          await prisma.cartItem.update({
+            where: {
+              slug_cartId: {
+                slug,
+                cartId,
+              },
             },
-          },
-          data: {
-            quantity: {
-              decrement: quantity,
+            data: {
+              quantity: {
+                decrement: quantity,
+              },
             },
+          });
+        }
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          const { code } = error;
+          if (code === "P2025") {
+            throw new GraphQLYogaError("Cart item does not exist");
+          }
+
+          console.error({
+            message:
+              "An unhandled prisma error occurred while deleting cart item",
+            code: code,
+          });
+          throw new GraphQLYogaError(error.message);
+        }
+
+        console.error({
+          message: "an error occurred while deleting item from cart",
+          error,
+          input: {
+            slug,
+            cartId,
+            quantity,
           },
         });
       }
@@ -170,18 +215,20 @@ const resolvers: Resolvers = {
         throw new GraphQLYogaError("Cart has no items");
       }
 
-      const line_items = cart.items.map((item) => ({
-        quantity: item.quantity,
-        price_data: {
-          currency: "USD",
-          unit_amount: item.price,
-          product_data: {
-            name: item.name,
-            description: item.description || undefined,
-            images: item.image ? [item.image] : [],
+      const line_items = cart.items
+        .map((item) => ({ ...item, ...getItem(item.slug) }))
+        .map((item) => ({
+          quantity: item.quantity,
+          price_data: {
+            currency: "USD",
+            unit_amount: item.price,
+            product_data: {
+              name: item.name,
+              description: item.description || undefined,
+              images: item.image ? [item.image] : [],
+            },
           },
-        },
-      }));
+        }));
 
       const session = await stripe.checkout.sessions.create({
         line_items,
