@@ -28,7 +28,7 @@ type CartItem {
 
 type Money {
   formatted: String!
-  amount: Int!
+  amount: Float!
 }
 
 type CheckoutSession {

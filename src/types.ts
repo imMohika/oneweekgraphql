@@ -62,7 +62,7 @@ export type Item = {
 
 export type Money = {
   __typename?: 'Money';
-  amount: Scalars['Int'];
+  amount: Scalars['Float'];
   formatted: Scalars['String'];
 };
 
@@ -110,6 +110,13 @@ export type RemoveFromCartInput = {
   quantity?: InputMaybe<Scalars['Int']>;
   slug: Scalars['Int'];
 };
+
+export type AddToCartMutationVariables = Exact<{
+  input: AddToCartInput;
+}>;
+
+
+export type AddToCartMutation = { __typename?: 'Mutation', addItem?: { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, description?: string | null, image?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null } | null };
 
 export type CartFragment = { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, description?: string | null, image?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null };
 
@@ -265,7 +272,7 @@ export type ItemResolvers<ContextType = GraphQLContext, ParentType extends Resol
 };
 
 export type MoneyResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Money'] = ResolversParentTypes['Money']> = {
-  amount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  amount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   formatted?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -327,6 +334,39 @@ export const ItemFragmentDoc = gql`
   description
 }
     `;
+export const AddToCartDocument = gql`
+    mutation addToCart($input: AddToCartInput!) {
+  addItem(input: $input) {
+    ...Cart
+  }
+}
+    ${CartFragmentDoc}`;
+export type AddToCartMutationFn = Apollo.MutationFunction<AddToCartMutation, AddToCartMutationVariables>;
+
+/**
+ * __useAddToCartMutation__
+ *
+ * To run a mutation, you first call `useAddToCartMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddToCartMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addToCartMutation, { data, loading, error }] = useAddToCartMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAddToCartMutation(baseOptions?: Apollo.MutationHookOptions<AddToCartMutation, AddToCartMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddToCartMutation, AddToCartMutationVariables>(AddToCartDocument, options);
+      }
+export type AddToCartMutationHookResult = ReturnType<typeof useAddToCartMutation>;
+export type AddToCartMutationResult = Apollo.MutationResult<AddToCartMutation>;
+export type AddToCartMutationOptions = Apollo.BaseMutationOptions<AddToCartMutation, AddToCartMutationVariables>;
 export const GetAllItemsDocument = gql`
     query GetAllItems {
   items {

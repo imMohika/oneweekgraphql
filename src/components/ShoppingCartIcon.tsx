@@ -1,14 +1,14 @@
 import { useCart } from "@/hooks/useCart";
 
 export function ShoppingCartIcon() {
-  const cart = useCart();
+  const { cart } = useCart();
   return (
     <div className="relative group">
       {/* Outlined shopping cart icon */}
       {/* Courtesy of [heroicons](https://heroicons.com/) */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 block group-hover:hidden"
+        className="block w-6 h-6 group-hover:hidden"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -24,7 +24,7 @@ export function ShoppingCartIcon() {
       {/* Also courtesy of [heroicons](https://heroicons.com/) */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 hidden group-hover:block"
+        className="hidden w-6 h-6 group-hover:block"
         viewBox="0 0 20 20"
         fill="currentColor"
       >
