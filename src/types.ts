@@ -116,9 +116,9 @@ export type AddToCartMutationVariables = Exact<{
 }>;
 
 
-export type AddToCartMutation = { __typename?: 'Mutation', addItem?: { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, description?: string | null, image?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null } | null };
+export type AddToCartMutation = { __typename?: 'Mutation', addItem?: { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, slug: number, price: number, image?: string | null, description?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null } | null };
 
-export type CartFragment = { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, description?: string | null, image?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null };
+export type CartFragment = { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, slug: number, price: number, image?: string | null, description?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null };
 
 export type GetAllItemsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -130,7 +130,7 @@ export type GetCartQueryVariables = Exact<{
 }>;
 
 
-export type GetCartQuery = { __typename?: 'Query', cart?: { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, description?: string | null, image?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null } | null };
+export type GetCartQuery = { __typename?: 'Query', cart?: { __typename?: 'Cart', id: number, total: number, subTotal: { __typename?: 'Money', formatted: string }, items?: Array<{ __typename?: 'CartItem', quantity: number, item: { __typename?: 'Item', name: string, slug: number, price: number, image?: string | null, description?: string | null }, unitTotal: { __typename?: 'Money', formatted: string, amount: number }, lineTotal: { __typename?: 'Money', formatted: string, amount: number } }> | null } | null };
 
 export type ItemFragment = { __typename?: 'Item', name: string, slug: number, price: number, image?: string | null, description?: string | null };
 
@@ -300,6 +300,15 @@ export type Resolvers<ContextType = GraphQLContext> = {
 };
 
 
+export const ItemFragmentDoc = gql`
+    fragment Item on Item {
+  name
+  slug
+  price
+  image
+  description
+}
+    `;
 export const CartFragmentDoc = gql`
     fragment Cart on Cart {
   id
@@ -309,9 +318,7 @@ export const CartFragmentDoc = gql`
   }
   items {
     item {
-      name
-      description
-      image
+      ...Item
     }
     quantity
     unitTotal {
@@ -324,16 +331,7 @@ export const CartFragmentDoc = gql`
     }
   }
 }
-    `;
-export const ItemFragmentDoc = gql`
-    fragment Item on Item {
-  name
-  slug
-  price
-  image
-  description
-}
-    `;
+    ${ItemFragmentDoc}`;
 export const AddToCartDocument = gql`
     mutation addToCart($input: AddToCartInput!) {
   addItem(input: $input) {

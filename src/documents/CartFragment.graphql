@@ -1,3 +1,5 @@
+# import Item from "./ItemFragment"
+
 fragment Cart on Cart {
   id
   total
@@ -6,9 +8,7 @@ fragment Cart on Cart {
   }
   items {
     item {
-      name
-      description
-      image
+      ...Item
     }
     quantity
     unitTotal {

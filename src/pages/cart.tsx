@@ -1,9 +1,9 @@
-import { useClient } from "@/hooks/useClient";
+import { ProductItem } from "@/components/ProductItem";
+import { ProductList } from "@/components/ProductList";
 import { getCartId } from "@/lib/cart.client";
-import { apolloClient } from "@/lib/client";
-import prisma from "@/prisma";
 import { useGetCartQuery } from "@/types";
 import { GetServerSideProps, NextPage } from "next";
+import { useEffect, useState } from "react";
 
 interface CartPageProps {
   cartId: number;
@@ -12,23 +12,36 @@ interface CartPageProps {
 const CartPage: NextPage<CartPageProps> = ({ cartId }) => {
   const { data } = useGetCartQuery({ variables: { id: cartId } });
 
-  if (!data) return <p>Loading</p>;
-
-  console.log({ data });
+  if (!data || !data?.cart) return <p>Loading</p>;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="p-8 min-h-screen">
-        <div className="mx-auto max-w-xl space-y-8">
-          <h1 className="text-4xl">Cart</h1>
-          <div>Items: {data?.cart?.total}</div>
-          <div className="border-t pt-4 flex justify-between">
-            <div>Subtotal</div>
-            <div>{data?.cart?.subTotal.formatted}</div>
+    <main className="min-h-screen p-8">
+      <div className="space-y-8">
+        <h1 className="text-4xl">Cart</h1>
+        <div className="grid w-full h-full grid-cols-3 p-8">
+          <div className="relative col-span-2 space-y-8">
+            {data.cart.items ? (
+              <ProductList
+                small
+                products={data.cart.items.map((t) => t.item)}
+              />
+            ) : (
+              <p>Your cart is empty</p>
+            )}
+          </div>
+          <div className="pt-4 my-4 border-t border-neutral-700">
+            <div className="flex justify-between">
+              <div>Subtotal</div>
+              <div>{data.cart.subTotal.formatted}</div>
+            </div>
+            <div className="flex justify-between font-bold">
+              <div>Total</div>
+              <div className="">{data.cart.subTotal.formatted}</div>
+            </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 };
 
