@@ -23,9 +23,15 @@ type CartItem {
   image: String
 }
 
+type CheckoutSession {
+  id: ID!
+  url: String
+}
+
 type Mutation {
   addItem(input: AddToCartInput!): Cart
   removeItem(input: RemoveFromCartInput!): Cart
+  createCheckoutSession(input: CreateCheckoutSessionInput!): CheckoutSession
 }
 
 input AddToCartInput {
@@ -41,4 +47,8 @@ input RemoveFromCartInput {
   cartId: Int!
   name: String!
   quantity: Int
+}
+
+input CreateCheckoutSessionInput {
+  cartId: Int!
 }
