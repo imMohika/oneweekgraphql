@@ -4,9 +4,15 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 const config: CodegenConfig = {
   overwrite: true,
   schema: "src/schema.graphql",
+  documents: "src/documents/**/*.graphql",
   generates: {
     "src/types.ts": {
-      plugins: ["typescript", "typescript-resolvers"],
+      plugins: [
+        "typescript",
+        "typescript-operations",
+        "typescript-resolvers",
+        "typescript-react-apollo",
+      ],
       config: {
         mapperTypeSuffix: "Model",
         mappers: {

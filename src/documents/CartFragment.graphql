@@ -1,0 +1,23 @@
+fragment Cart on Cart {
+  id
+  total
+  subTotal {
+    formatted
+  }
+  items {
+    item {
+      name
+      description
+      image
+    }
+    quantity
+    unitTotal {
+      formatted
+      amount
+    }
+    lineTotal {
+      formatted
+      amount
+    }
+  }
+}

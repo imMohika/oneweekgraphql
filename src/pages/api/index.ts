@@ -5,7 +5,7 @@ import { join } from "path";
 import { prisma } from "../../prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { findOrCreateCart } from "@/lib/cart";
+import { findCart } from "@/lib/cart.server";
 import { stripe } from "@/lib/stripe";
 import { origin } from "@/lib/client";
 import { getItem, products } from "@/lib/products";
@@ -19,25 +19,21 @@ const typeDefs = readFileSync(join(process.cwd(), "src/schema.graphql"), {
   encoding: "utf-8",
 });
 
-export type GraphQLContext = {
-  prisma: PrismaClient;
-};
+export type GraphQLContext = {};
 
 export async function createContext(): Promise<GraphQLContext> {
-  return {
-    prisma,
-  };
+  return {};
 }
 
 const resolvers: Resolvers = {
   Query: {
-    cart: async (_, { id }, { prisma }) => findOrCreateCart(prisma, id),
-    item: async (_, { slug }, { prisma }) => {
+    cart: async (_, { id }) => findCart(id),
+    item: async (_, { slug }) => {
       return getItem(slug);
     },
   },
   Cart: {
-    items: async ({ id }, _, { prisma }) => {
+    items: async ({ id }, _) => {
       return prisma.cart
         .findUnique({
           where: {
@@ -47,7 +43,7 @@ const resolvers: Resolvers = {
         .items();
     },
 
-    total: async ({ id }, _, { prisma }) => {
+    total: async ({ id }, _) => {
       const items = await prisma.cart
         .findUnique({
           where: {
@@ -59,7 +55,7 @@ const resolvers: Resolvers = {
 
       return items.reduce((total, item) => total + item.quantity || 1, 0);
     },
-    subTotal: async ({ id }, _, { prisma }) => {
+    subTotal: async ({ id }, _) => {
       const items = await prisma.cart
         .findUnique({
           where: {
@@ -107,8 +103,8 @@ const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    addItem: async (_, { input }, { prisma }) => {
-      const cart = await findOrCreateCart(prisma, input.cartId);
+    addItem: async (_, { input }) => {
+      const cart = await findCart(input.cartId);
       const item = getItem(input.slug);
 
       await prisma.cartItem.upsert({
@@ -133,7 +129,7 @@ const resolvers: Resolvers = {
       return cart;
     },
 
-    removeItem: async (_, { input }, { prisma }) => {
+    removeItem: async (_, { input }) => {
       const { slug, cartId, quantity } = input;
       console.log({
         message: "deleting item from cart",
@@ -193,9 +189,9 @@ const resolvers: Resolvers = {
         });
       }
 
-      return findOrCreateCart(prisma, cartId);
+      return findCart(cartId);
     },
-    createCheckoutSession: async (_, { input }, { prisma }) => {
+    createCheckoutSession: async (_, { input }) => {
       const { cartId } = input;
 
       const cart = await prisma.cart.findUnique({
