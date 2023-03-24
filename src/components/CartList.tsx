@@ -4,9 +4,10 @@ import { CartItem } from "./CartItem";
 
 export interface CartListProps {
   cartId: number;
+  readonly?: boolean;
 }
 
-export function CartList({ cartId }: CartListProps) {
+export function CartList({ cartId, readonly = false }: CartListProps) {
   const { data } = useGetCartQuery({ variables: { id: cartId } });
   if (!data || !data?.cart) return <p>Loading</p>;
 
@@ -16,7 +17,7 @@ export function CartList({ cartId }: CartListProps) {
         data.cart.items
           .map((t) => t.item)
           .map((product, index) => (
-            <CartItem product={product} cartId={cartId} />
+            <CartItem product={product} cartId={cartId} readonly={readonly} />
           ))
       ) : (
         <p>Your cart is empty</p>

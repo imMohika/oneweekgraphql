@@ -5,11 +5,13 @@ import Link from "next/link";
 export interface CartItemProps {
   product: Item;
   cartId: number;
+  readonly?: boolean;
 }
 
 export function CartItem({
   product: { price, slug, image, name },
   cartId,
+  readonly = false,
 }: CartItemProps) {
   const [removeFromCart, { loading: removingFromCart }] =
     useRemoveFromCartMutation({
@@ -32,17 +34,19 @@ export function CartItem({
         />
       )}
       <div className="absolute bottom-0 left-0 z-10 flex w-full gap-2">
-        <button
-          onClick={() =>
-            removeFromCart({
-              variables: { input: { slug, cartId } },
-            })
-          }
-          disabled={removingFromCart}
-          className="p-1 font-light border border-neutral-700 hover:bg-black hover:text-white"
-        >
-          Remove
-        </button>
+        {!readonly && (
+          <button
+            onClick={() =>
+              removeFromCart({
+                variables: { input: { slug, cartId } },
+              })
+            }
+            disabled={removingFromCart}
+            className="p-1 font-light border border-neutral-700 hover:bg-black hover:text-white"
+          >
+            Remove
+          </button>
+        )}
         <Link href={`/products/${slug}`}>
           <button
             disabled={removingFromCart}
