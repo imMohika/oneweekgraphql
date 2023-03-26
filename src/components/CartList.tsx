@@ -17,7 +17,12 @@ export function CartList({ cartId, readonly = false }: CartListProps) {
         data.cart.items
           .map((t) => t.item)
           .map((product, index) => (
-            <CartItem product={product} cartId={cartId} readonly={readonly} />
+            <CartItem
+              key={product.slug}
+              product={product}
+              cartId={cartId}
+              readonly={readonly}
+            />
           ))
       ) : (
         <p>Your cart is empty</p>

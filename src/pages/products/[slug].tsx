@@ -8,7 +8,7 @@ import {
 } from "next";
 import Image from "next/image";
 import { useCart } from "@/hooks/useCart";
-import { ReactEventHandler } from "react";
+import { MouseEvent, MouseEventHandler, ReactEventHandler } from "react";
 
 const ProductPage: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
@@ -19,7 +19,8 @@ const ProductPage: NextPage<
   });
   const { cartId } = useCart();
 
-  const addItemToCart = () => {
+  const addItemToCart: MouseEventHandler<HTMLButtonElement> = (event) => {
+    event.preventDefault();
     addToCart({
       variables: {
         input: {

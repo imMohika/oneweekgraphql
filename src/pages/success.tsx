@@ -28,7 +28,7 @@ const SuccessPage: NextPage<SuccessPageProps> = ({
     return (
       <main className="grid flex-1 max-w-4xl min-h-full grid-cols-2 mx-auto space-y-8">
         <p className="text-xl text-red-600">ERROR</p>
-        <p className="text-2xl">Session metadata isn't valid</p>
+        <p className="text-2xl">{`Session metadata isn't valid`}</p>
       </main>
     );
   }
@@ -45,7 +45,7 @@ const SuccessPage: NextPage<SuccessPageProps> = ({
     return (
       <main className="grid flex-1 max-w-4xl min-h-full grid-cols-2 mx-auto space-y-8">
         <p className="text-xl text-red-600">ERROR</p>
-        <p className="text-2xl">Cart isn't valid</p>
+        <p className="text-2xl">{`Cart isn't valid`}</p>
       </main>
     );
   }
